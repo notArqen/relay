@@ -1030,31 +1030,6 @@
                 handleDisconnect(conn.peer);
             });
 
-            // ICE state monitoring for debugging
-            try {
-                const attachICE = (pc) => {
-                    pc.oniceconnectionstatechange = () => {
-                        console.log('[ICE]', conn.peer, 'iceConnectionState:', pc.iceConnectionState);
-                    };
-                    pc.onicegatheringstatechange = () => {
-                        console.log('[ICE]', conn.peer, 'iceGatheringState:', pc.iceGatheringState);
-                    };
-                    pc.onconnectionstatechange = () => {
-                        console.log('[ICE]', conn.peer, 'connectionState:', pc.connectionState);
-                    };
-                    console.log('[ICE] Monitoring attached for', conn.peer, 'current state:', pc.iceConnectionState);
-                };
-                const pc = conn.peerConnection || conn._peerConnection;
-                if (pc) {
-                    attachICE(pc);
-                } else {
-                    const checkPC = setInterval(() => {
-                        const pc2 = conn.peerConnection || conn._peerConnection;
-                        if (pc2) { clearInterval(checkPC); attachICE(pc2); }
-                    }, 200);
-                    setTimeout(() => clearInterval(checkPC), 16000);
-                }
-            } catch (e) { console.warn('ICE monitoring setup failed:', e); }
 
             // Timeout: if connection doesn't open in 15 seconds, clean up
             setTimeout(() => {
