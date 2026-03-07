@@ -146,9 +146,33 @@
             height: 72px;
             margin-bottom: 4px;
             object-fit: contain;
-            animation: fadeUp 0.6s ease;
+            animation: logoReveal 0.7s cubic-bezier(.16, 1, .3, 1) both;
             image-rendering: pixelated;
             filter: drop-shadow(0 0 4px var(--accent))
+        }
+
+        @keyframes logoReveal {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .tagline {
@@ -158,6 +182,7 @@
             text-transform: uppercase;
             margin-bottom: 44px;
             text-align: center;
+            animation: fadeUp 0.6s 0.15s both;
         }
 
         .code-display {
@@ -813,7 +838,7 @@
                 </div>
                 <div class="wait-hint">share this code — waiting for peer to connect...</div>
             </div>
-            <div class="divider" style="animation-delay:0.2s"><span>or join</span></div>
+            <div class="divider" style="animation:fadeUp 0.6s both; animation-delay:0.2s"><span>or join</span></div>
             <div style="animation:fadeUp 0.6s both; animation-delay:0.3s">
                 <div
                     style="font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">
@@ -825,7 +850,7 @@
                 </div>
                 <div class="error-msg" id="errorMsg"></div>
             </div>
-            <div class="status-bar" style="animation-delay:0.4s">
+            <div class="status-bar" style="animation:fadeUp 0.6s both; animation-delay:0.4s">
                 <span class="dot" id="statusDot"></span>
                 <span id="statusText">initializing...</span>
             </div>
@@ -988,11 +1013,15 @@
             conn.on('open', () => {
                 gConns[conn.peer] = conn;
                 conn.send({ type: 'hello', version: APP_VERSION, sender: myCode });
+                // For outgoing connections, enter app immediately on open
                 if (onReady) onReady();
             });
             conn.on('data', data => handleData(conn.peer, data));
             conn.on('close', () => handleDisconnect(conn.peer));
-            conn.on('error', () => handleDisconnect(conn.peer));
+            conn.on('error', (err) => {
+                console.error('Connection error with', conn.peer, err);
+                handleDisconnect(conn.peer);
+            });
         }
 
         function handleDisconnect(peerId) {
@@ -1023,7 +1052,7 @@
                 if (callback) callback();
                 return;
             }
-            const conn = peer.connect(code, { reliable: true });
+            const conn = peer.connect(code, { reliable: true, serialization: 'json' });
             gConns[code] = conn;
             setupConnection(conn, callback);
         }
@@ -1032,17 +1061,21 @@
         function handleData(peerId, data) {
             if (data.type === 'hello') {
                 if (data.version !== APP_VERSION) {
-                    gConns[peerId].send({ type: 'error', msg: 'Version mismatch. Please update RELAY.' });
-                    setTimeout(() => gConns[peerId].close(), 1000);
+                    if (gConns[peerId]) gConns[peerId].send({ type: 'error', msg: 'Version mismatch. Please update RELAY.' });
+                    setTimeout(() => { if (gConns[peerId]) gConns[peerId].close(); }, 1000);
                     return;
                 }
-                gConns[peerId].send({ type: 'hello-ack', version: APP_VERSION, sender: myCode });
+                if (gConns[peerId]) gConns[peerId].send({ type: 'hello-ack', version: APP_VERSION, sender: myCode });
                 ensureDMRoom(peerId);
-                if (eId('lobby').classList.contains('visible')) enterApp();
+                // Receiver: auto-enter app when receiving hello from a new peer
+                if (eId('lobby') && eId('lobby').classList.contains('visible')) enterApp();
+                if (activeRoomId === null) selectRoom(getDMId(myCode, peerId));
             }
             else if (data.type === 'hello-ack') {
-                if (data.version !== APP_VERSION) return gConns[peerId].close();
+                if (data.version !== APP_VERSION) { if (gConns[peerId]) gConns[peerId].close(); return; }
                 ensureDMRoom(peerId);
+                // Initiator: select the DM room after handshake completes
+                if (activeRoomId === null) selectRoom(getDMId(myCode, peerId));
             }
             else if (data.type === 'error') {
                 alert("Peer Error: " + data.msg);
