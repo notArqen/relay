@@ -157,6 +157,7 @@
             letter-spacing: 2px;
             text-transform: uppercase;
             margin-bottom: 44px;
+            text-align: center;
         }
 
         .code-display {
@@ -927,8 +928,31 @@
             myCode = generateCode();
             setStatus('connecting to network...', '');
             peer = new Peer(myCode, {
-                host: '0.peerjs.com', port: 443, secure: true, path: '/',
-                config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
+                host: '0.peerjs.com',
+                port: 443,
+                secure: true,
+                path: '/',
+                config: {
+                    'iceServers': [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        {
+                            urls: 'turn:openrelay.metered.ca:80',
+                            username: 'openrelayproject',
+                            credential: 'openrelayproject'
+                        },
+                        {
+                            urls: 'turn:openrelay.metered.ca:443',
+                            username: 'openrelayproject',
+                            credential: 'openrelayproject'
+                        },
+                        {
+                            urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+                            username: 'openrelayproject',
+                            credential: 'openrelayproject'
+                        }
+                    ]
+                }
             });
 
             peer.on('open', () => {
