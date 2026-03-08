@@ -2,7 +2,7 @@
 <html lang="en">
 
 <!--  project KESTREL  -->
-    
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -1051,12 +1051,13 @@
                     onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">skip to
                     app →</a>
             </div>
-             <div style="position:absolute;bottom:16px;left:0;right:0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:10px;color:#333;letter-spacing:2px;text-transform:uppercase;pointer-events:none;z-index:1;">relayX - mobile build - v.x.m.1</div>
         </div>
     </div>
 
     <!-- APP INNER -->
     <div class="screen hidden-right" id="app-inner">
+        <!-- SIDEBAR BACKDROP (tap to close) -->
+        <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
         <!-- SIDEBAR -->
         <div id="sidebar">
             <div class="sidebar-header">
@@ -1068,6 +1069,7 @@
                         style="padding:2px 4px;font-size:8px">copy</button>
                     <button class="disc-btn" onclick="showSettings()"
                         style="padding:2px 4px;font-size:8px;border:none">⚙️</button>
+                    <button class="sidebar-close" onclick="closeSidebar()">&times;</button>
                 </div>
             </div>
             <div class="sidebar-actions">
@@ -1081,7 +1083,7 @@
         <div id="chat-pane">
             <div class="chat-header">
                 <div style="display:flex;align-items:center;gap:10px">
-                    <button class="disc-btn" onclick="document.getElementById('sidebar').classList.toggle('collapsed')"
+                    <button class="disc-btn" onclick="toggleSidebar()"
                         style="font-size:14px;padding:4px 8px;border:none">☰</button>
                     <div>
                         <div class="chat-title" id="chatTitle">RELAY</div>
@@ -1449,8 +1451,24 @@
                 }
             }
         }
-
         // --- APP & UI LOGIC ---
+        function toggleSidebar() {
+            const sb = eId('sidebar');
+            const bd = eId('sidebarBackdrop');
+            if (sb.classList.contains('collapsed')) {
+                sb.classList.remove('collapsed');
+                if (window.innerWidth <= 768 && bd) bd.classList.add('visible');
+            } else {
+                sb.classList.add('collapsed');
+                if (bd) bd.classList.remove('visible');
+            }
+        }
+
+        function closeSidebar() {
+            eId('sidebar').classList.add('collapsed');
+            const bd = eId('sidebarBackdrop');
+            if (bd) bd.classList.remove('visible');
+        }
         function enterApp() {
             eId('lobby').classList.replace('visible', 'hidden-left');
             eId('app-inner').classList.replace('hidden-right', 'visible');
