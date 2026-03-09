@@ -79,7 +79,7 @@ since it's a single file, it runs anywhere static files are served:
 npx serve .
 ```
 
-then navigate to `relayx.html` and share the generated session url.
+then navigate to `relayx.html` and share the generated session url. relay is already hosted on github pages for your convienience.
 
 ---
 
