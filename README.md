@@ -37,7 +37,7 @@ messages are encrypted on your device before they leave it. when the session end
 
 ### interface
 - clean, minimal layout designed to stay out of the way
-- responsive — works on desktop and mobile
+- responsive — works on desktop and (unstably) mobile
 - **relay-mini** — a stripped-down lightweight variant for when even the standard version feels like too much
 
 ### privacy
