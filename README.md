@@ -19,7 +19,7 @@
 
 **relay** is a fully self-contained, single HTML file chat application. no build process, no package manager, no backend — just one file you open in a browser and share a link. it's designed to feel like a proper messaging app without any of the surveillance infrastructure that comes with being one.
 
-messages are encrypted on your device before they leave it. when the session ends, everything disappears. no logs, no history, no account needed. just open it, talk, close it.
+messages are encrypted on your device before they leave it. when the session ends, everything disappears. no logs, no history, no account needed. just open it, talk, close it. note that relay uses a p2p connection and does not mask IP addresses--relay only provides privacy, not anonymity.
 
 ---
 
